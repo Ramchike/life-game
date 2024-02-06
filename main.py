@@ -48,7 +48,6 @@ class DrawUI():
         new_game_off = pygame.image.load(BUTTONS_OFF["Создать игру"]).convert_alpha()
         stats_off = pygame.image.load(BUTTONS_OFF["Статистика"]).convert_alpha()
         quit_off = pygame.image.load(BUTTONS_OFF["Выйти"]).convert_alpha()
-        
         new_game_on = pygame.image.load(BUTTONS_ON["Создать игру"]).convert_alpha()
         stats_on = pygame.image.load(BUTTONS_ON["Статистика"]).convert_alpha()
         quit_on = pygame.image.load(BUTTONS_ON["Выйти"]).convert_alpha()
