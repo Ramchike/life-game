@@ -37,12 +37,10 @@ class Button():
         
     def if_hover(self):
         pos = pygame.mouse.get_pos()
-        print(self.rect.collidepoint(pos[0], pos[1]))
         return self.rect.collidepoint(pos[0], pos[1])
     
     def if_clicked(self):
         pos = pygame.mouse.get_pos()
-        print(pygame.mouse.get_pressed()[0] and self.if_hover())
         return pygame.mouse.get_pressed()[0] and self.if_hover()
         
         
@@ -90,7 +88,6 @@ class DrawUI():
             
         if new_game_off_button.if_clicked():
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-            print("Нажал на 1 кнопку")
             DrawUI.game_screen()
         
         pygame.display.update()
@@ -123,8 +120,6 @@ class DrawUI():
         board.draw()
         if board.rect.collidepoint(pos[0], pos[1]):
             pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        else:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
         
         while RUN:
             pos = pygame.mouse.get_pos()
@@ -174,10 +169,11 @@ class Board():
                 if rect.collidepoint(pos[0], pos[1]):
                     pygame.draw.rect(DISPLAY, (199, 199, 199), rect, 0)
                     pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-                else:
+                    if pygame.mouse.get_pressed()[0]:
+                         print(f"PRESSED ON [{x // self.x - 1}] [{y // self.y - 1}]")
+                elif self.selected[x // self.x - 1][y // self.y - 1] != 1:
                     pygame.draw.rect(DISPLAY, (0, 0, 0), rect, 0)
                     pygame.draw.rect(DISPLAY, (199, 199, 199), rect, 1)
-                #if rect.collidepoint(pos[0], pos[1]):
                     
     
     def is_clicked(self):
