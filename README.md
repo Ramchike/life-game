@@ -1,4 +1,4 @@
-![логотип](https://imgbly.com/ib/TrkqgixW94)
+![логотип](https://imgbly.com/ib/TrkqgixW94.png)
 
 # Техническое задание: Игра "Жизнь"
 
