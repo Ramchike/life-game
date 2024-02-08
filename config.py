@@ -4,6 +4,9 @@ FPS = 60
 
 TEXT_MENU = 'assets/Заголовок.png'
 TEXT_BOARD = 'assets/Игровое поле.png'
+TEXT_END = 'assets/Конец игры.png'
+
+MUSIC = 'assets/main_game.mp3'
 
 BOARD = {
     "x": 80,
@@ -13,18 +16,14 @@ BOARD = {
     "grid": 16,
 }
 
-BUTTONS_OFF = {
-    "Создать игру": 'assets/Создать игру_off.png',
-    "Статистика": 'assets/Статистика_off.png',
+BUTTONS = {
+    "Создать игру": 'assets/Создать игру.png',
+    "Настройки": 'assets/Настройки.png',
     "Выйти": 'assets/Выйти_off.png',
     "Назад": 'assets/Назад_off.png',
-}
-
-BUTTONS_ON = {
-    "Создать игру": 'assets/Создать игру.png',
-    "Статистика": 'assets/Статистика.png',
-    "Выйти": 'assets/Выйти.png',
-    "Назад": 'assets/Назад.png',
+    "Старт": 'assets/Старт_off.png',
+    "Конец игры": 'assets/Конец игры.png',
+    
 }
 
 COLOUR = {

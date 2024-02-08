@@ -1,190 +1,308 @@
 import pygame
+import time
 from config import *
 
 WIDTH = 900
-HIGHT = 500
+HEIGHT = 500
 
-DISPLAY = pygame.display.set_mode((WIDTH, HIGHT))
-pygame.display.set_caption(TITLE_WINDOW)
+pygame.mixer.init()
+pygame.mixer.music.load(MUSIC)
 
-class Game():
+# Подгрузка иконок с конфига в pygame и конвертация их в альфа-канал.
+surface = pygame.display.set_mode((WIDTH, HEIGHT))
+title_img = pygame.image.load(TEXT_MENU).convert_alpha()
+new_game_img = pygame.image.load(BUTTONS["Создать игру"]).convert_alpha()
+settings_img = pygame.image.load(BUTTONS["Настройки"]).convert_alpha()
+quit_img = pygame.image.load(BUTTONS["Выйти"]).convert_alpha()
+game_menu = pygame.image.load(TEXT_BOARD).convert_alpha()
+back = pygame.image.load(BUTTONS["Назад"]).convert_alpha()
+start = pygame.image.load(BUTTONS["Старт"]).convert_alpha()
+ended = pygame.image.load(BUTTONS["Конец игры"]).convert_alpha()
 
-    def start(self):
-        pygame.init()
-        clock = pygame.time.Clock()
 
-        RUN = True   
-        while RUN:
-            clock.tick(FPS)
+class Button:
+    """
+    Класс, представляющий кнопку в пользовательском интерфейсе. 
+    Он содержит методы для отображения кнопки на экране, проверки нажатия на кнопку.
+    """
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    RUN = False
 
-            DrawUI.main_menu()
-            pygame.display.update()
-
-        pygame.quit()
-
-class Button():
-    def __init__(self, x, y, image):
+    def __init__(self, x, y, image, text="", hover_color=(255,255,255)):
         self.image = image
         self.rect = self.image.get_rect()
         self.rect.topleft = (x, y)
-
+        self.text = text
+        self.hovered = False
+        self.hover_image = self.image.copy()
+        
     def draw(self):
-        DISPLAY.blit(self.image, (self.rect.x, self.rect.y))
+        surface.blit(self.image, (self.rect.x, self.rect.y))
         
-    def if_hover(self):
-        pos = pygame.mouse.get_pos()
-        return self.rect.collidepoint(pos[0], pos[1])
+    def is_clicked(self, pos):
+        return self.rect.collidepoint(pos)
     
-    def if_clicked(self):
-        pos = pygame.mouse.get_pos()
-        return pygame.mouse.get_pressed()[0] and self.if_hover()
         
-        
-class DrawUI():
+
+class Board:
+    """
+    Класс, представляющий игровое поле. 
+    Он отвечает за отрисовку клеток игрового поля, обработку нажатий на клетки и выполнение логики игры.
+    """
     
-    def main_menu():
-        DISPLAY.fill(COLOUR["BLACK"])
-
-        title = pygame.image.load(TEXT_MENU).convert_alpha()
-        new_game_off = pygame.image.load(BUTTONS_OFF["Создать игру"]).convert_alpha()
-        stats_off = pygame.image.load(BUTTONS_OFF["Статистика"]).convert_alpha()
-        quit_off = pygame.image.load(BUTTONS_OFF["Выйти"]).convert_alpha()
-        new_game_on = pygame.image.load(BUTTONS_ON["Создать игру"]).convert_alpha()
-        stats_on = pygame.image.load(BUTTONS_ON["Статистика"]).convert_alpha()
-        quit_on = pygame.image.load(BUTTONS_ON["Выйти"]).convert_alpha()
-
-        title_menu = Button(34, 45, title)
-        
-        new_game_off_button = Button(34, 180, new_game_off)
-        stats_off_button = Button(34, 270, stats_off)
-        quit_off_button = Button(34, 360, quit_off)
-        
-        BUTTONS = [new_game_off_button, stats_off_button, quit_off_button]
-        
-        title_menu.draw()
-        new_game_off_button.draw()
-        stats_off_button.draw()
-        quit_off_button.draw()
-        
-        # Отрисовка кнопок при наведении на них.
-        if new_game_off_button.if_hover():
-            new_game_off_button.image = new_game_on
-            new_game_off_button.draw()
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)            
-        elif stats_off_button.if_hover():
-            stats_off_button.image = stats_on
-            stats_off_button.draw()
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        elif quit_off_button.if_hover():
-            quit_off_button.image = quit_on
-            quit_off_button.draw()
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        else:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-            
-        if new_game_off_button.if_clicked():
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-            DrawUI.game_screen()
-        
-        pygame.display.update()
-
-    def game_screen():
-        CLICKED = False
-        RUN = True
-        
-        pos = pygame.mouse.get_pos()
-        DISPLAY.fill(COLOUR["BLACK"])
-        game_menu = pygame.image.load(TEXT_BOARD).convert_alpha()
-        back_off = pygame.image.load(BUTTONS_OFF["Назад"]).convert_alpha()
-        back_on = pygame.image.load(BUTTONS_ON["Назад"]).convert_alpha()
-        
-        game_menu_title = Button(244, 26, game_menu)
-        back_off_button = Button(24, 454, back_off)
-        
-        if back_off_button.if_hover():
-            back_off_button.image = back_on
-            back_off_button.draw()
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        else:
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-        if back_off_button.if_clicked():
-            RUN = False
-            
-        game_menu_title.draw()
-        back_off_button.draw()
-        board = Board(BOARD['x'], BOARD['y'], BOARD['width'] + BOARD['x'], BOARD['height'] + BOARD['y'], BOARD['grid'])
-        board.draw()
-        if board.rect.collidepoint(pos[0], pos[1]):
-            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-        
-        while RUN:
-            pos = pygame.mouse.get_pos()
-            board.is_hover()
-            if board.rect.collidepoint(pos[0], pos[1]):
-                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-            if back_off_button.if_hover():
-                back_off_button.image = back_on
-                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-            else:
-                back_off_button.image = back_off
-                pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
-            back_off_button.draw()
-            if back_off_button.if_clicked():
-                RUN = False
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    RUN = False
-            pygame.display.update()
-        
-            
-class Board():
-    def __init__(self, x, y, width, height, size, random=False):
+    
+    def __init__(self, x, y, width, height, cell_size):
         self.x = x
         self.y = y
         self.width = width
         self.height = height
-        self.size = size
-        self.cell_w = self.width // self.size
-        self.cell_h = self.height // self.size
-        self.random = random
-        self.rect = pygame.Rect(x, y, self.size, self.size)
-        self.selected = [[0]*self.cell_w]*self.cell_h
+        self.cell_size = cell_size
+        
+        # Высчет столбцов и строк для матрицы в зависимости от размера поля по ширине и высоте.
+        self.rows = self.height // self.cell_size
+        self.cols = self.width // self.cell_size
+        self.matrix = [[0]* self.cols for _ in range(self.rows)]
+        
+    def draw(self, surface=surface):
+        for row in range(self.rows):
+            for col in range(self.cols):
+                if self.matrix[row][col] == 1:
+                    cell_color = (0, 218, 22)
+                else:
+                    cell_color = (255, 255, 255)
+                pygame.draw.rect(surface, cell_color, (self.x + col * self.cell_size, self.y + row * self.cell_size, self.cell_size, self.cell_size), 1 - self.matrix[row][col])
+
+    # Метод для редактирования поля.
+    def cell_click (self, pos):
+        x, y = pos
+        col = (x - self.x) // self.cell_size
+        row = (y - self.y) // self.cell_size
+        # Проверка на границы матрицы.
+        if 0 <= row < self.rows and 0 <= col < self.cols:
+            if self.matrix[row][col] == 1:
+                hover_color = (0, 0, 0)
+            else:
+                hover_color = (0, 90, 9)
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_CROSSHAIR)
+            pygame.draw.rect(surface, hover_color, (self.x + col * self.cell_size, self.y + row * self.cell_size, self.cell_size, self.cell_size), 0)
+            # Смена клетки (Живая/Мертвая) при нажатии на неё.
+            if pygame.mouse.get_pressed()[0]:
+                self.matrix[row][col] = 1 if self.matrix[row][col] == 0 else 0
+        else:
+            pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_ARROW)
+        pygame.display.update()
+
+
+class MainMenu():
+    """
+    Класс, представляющий главное меню игры. 
+    Он содержит методы для отображения главного меню, обработки событий взаимодействия с кнопками меню и перехода к другим частям игры.
+    """
     
-    def draw(self):
+    
+    def __init__(self):
+        self.buttons = [
+            Button(34, 45, title_img),
+            Button(34, 180, new_game_img, "Начать игру"),
+            Button(34, 270, settings_img, "Настройки"),
+            Button(34, 360, quit_img, "Выйти")
+        ]
+        self.cursor = pygame.SYSTEM_CURSOR_ARROW
+    
+    # Метод проверки на события внутри игры.
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                pygame.quit()
+                quit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    for button in self.buttons:
+                        if button.is_clicked(event.pos):
+                            print(button.text)
+                            self.handle_button_click(button)
+                            
+    def is_button_hover(self):
         pos = pygame.mouse.get_pos()
-        for x in range(self.x, self.width, self.size):
-            for y in range(self.y, self.height, self.size):
-                rect = pygame.Rect(x, y, self.size, self.size)
-                pygame.draw.rect(DISPLAY, (199, 199, 199), rect, 1)
+        for button in self.buttons:
+            if button.is_clicked(pos):
+                return True
+            else:
+                return False
+                                  
+    def handle_button_click(self, button):
+        if button.text == "Начать игру":
+            game_page = GamePage()
+            game_page.construct()
+        elif button.text == "Настройки":
+            pass
+        elif button.text == "Выйти":
+            pygame.quit()
+            quit()
+    
+    def draw(self, surface=surface):
+        surface.fill((0, 0, 0))
+        for button in self.buttons:
+            pos = pygame.mouse.get_pos()
+            button.draw()
                 
-    def is_hover(self):
-        pos = pygame.mouse.get_pos()
-        for x in range(self.x, self.width, self.size):
-            for y in range(self.y, self.height, self.size):
-                rect = pygame.Rect(x, y, self.size, self.size)
-                if rect.collidepoint(pos[0], pos[1]):
-                    pygame.draw.rect(DISPLAY, (199, 199, 199), rect, 0)
-                    pygame.mouse.set_cursor(pygame.SYSTEM_CURSOR_HAND)
-                    if pygame.mouse.get_pressed()[0]:
-                         print(f"PRESSED ON [{x // self.x - 1}] [{y // self.y - 1}]")
-                elif self.selected[x // self.x - 1][y // self.y - 1] != 1:
-                    pygame.draw.rect(DISPLAY, (0, 0, 0), rect, 0)
-                    pygame.draw.rect(DISPLAY, (199, 199, 199), rect, 1)
-                    
+        pygame.display.update()
+
+class GamePage:
+    """Класс, представляющий игровую страницу. 
+    Он отображает игровое поле и кнопки для управления игрой, такие как "Старт" и "Выйти (<)". 
+    Также содержит логику обновления игрового поля и проверки условий окончания игры."""
     
-    def is_clicked(self):
-        pos = pygame.mouse.get_pos()
-        return self.rect.collidepoint(pos[0], pos[1]) and pygame.mouse.get_pressed[0]
-                    
+    def __init__(self):
+        self.buttons = [
+            Button(244, 26, game_menu),
+            Button(24, 454, back, "Назад"),
+            Button(394, 450, start, "Старт")
+        ]
+        self.game_board = Board(BOARD["x"], BOARD["y"], BOARD["width"], BOARD["height"], BOARD['grid'])
+        self.is_started = False
+        self.clock = pygame.time.Clock()  # Создание экземпляра объекта Clock
+        self.fps = 30  # Частота кадров в секунду
+
+    # Метод проверки на события внутри игры.
+    def handle_events(self):
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                self.run = False
+                pygame.quit()
+                quit()
+            elif event.type == pygame.MOUSEBUTTONDOWN:
+                if event.button == 1:
+                    for button in self.buttons:
+                        if button.is_clicked(event.pos):
+                            
+                            self.handle_button_click(button)
+                            
+    def handle_button_click(self, button):
+        if button.text == "Назад":
+            quit()
+        elif button.text == "Старт":
+            self.is_started = True
+            self.start()
             
+    def construct(self):
+        while not self.is_started:
+            self.handle_events()  # Обработка событий Pygame
+            pos = pygame.mouse.get_pos()
+            self.draw()  # Отрисовка поля
+            self.game_board.cell_click(pos)
+                
+    def start(self):
+        self.is_updating = True
+        start_time = time.time()  # Получаем текущее время в секундах
+        pygame.mixer.music.play(-1)
+        while self.is_updating:
+            current_time = time.time()
+            self.clock.tick(self.fps)  # Ограничение частоты кадров до self.fps
+            self.handle_events()  # Обработка событий Pygame
+            self.draw()  # Отрисовка поля
+            self.update_game()
+            # Проверяем результат игры и останавливаем её.
+            if self.game_result(current_time, start_time):  
+                self.buttons[0].image = ended
+                self.buttons[0].draw()
+                pygame.display.update()
+                pygame.mixer.music.stop()
+                pygame.time.wait(2000)
+                break
+
+    def update_game(self):
+        """
+        Метод обновляет состояние игрового поля с учетом правил игры "Жизнь". 
+        Для каждой клетки на игровом поле он использует метод count_live_neighbors, чтобы определить количество живых соседей. 
+        Затем, в соответствии с правилами игры, клетка может либо остаться живой, либо умереть, либо стать живой, если ранее была мертвой. 
+        Эти изменения записываются в новую сетку (new_grid), 
+        которая затем заменяет текущую сетку игры после завершения итерации по всем клеткам поля.
+        """
+        
+        
+        self.clock.tick(self.fps)  # Ограничение частоты кадров до self.fps
+        new_grid = [[0] * self.game_board.cols for _ in range(self.game_board.rows)]
+        # Основная логика и правила игры жизнь.
+        for row in range(self.game_board.rows):
+            for col in range(self.game_board.cols):
+                live_neighbors = self.count_live_neighbors(row, col)
+                if self.game_board.matrix[row][col] == 1:
+                    if live_neighbors < 2 or live_neighbors > 3:
+                        new_grid[row][col] = 0
+                        print("Делаю клетку мертвой")
+                    else:
+                        new_grid[row][col] = 1
+                        print("Делаю клетку живой")
+                else:
+                    if live_neighbors == 3:
+                        new_grid[row][col] = 1
+                        print("Делаю клетку живой")
+        self.game_board.matrix = new_grid
+        print("поменял поле")
+        self.draw()
     
+    def count_live_neighbors(self, row, col):
+        """
+        Метод считает количество живых соседей для заданной клетки на игровом поле. 
+        Он перебирает все соседние клетки вокруг данной клетки и увеличивает счетчик, если клетка является живой. 
+        При этом учитывается, что соседи могут находиться как слева и сверху, так и справа и снизу от выбранной клетки, а также по диагонали.
+        """
+        
+        
+        live_neighbors = 0
+        for i in range(-1, 2):
+            for j in range(-1, 2):
+                if (i != 0 or j != 0) and 0 <= row + i < self.game_board.rows and 0 <= col + j < self.game_board.cols:
+                    live_neighbors += self.game_board.matrix[row + i][col + j]
+        return live_neighbors
+    
+    def game_result(self, current_time, start_time):
+        if all(cell == 0 for row in self.game_board.matrix for cell in row):
+            print("Все клетки вымерли.")
+            return True
+        elif current_time - start_time >= 30:
+            print("Игра застряла в стабильном состоянии. Игра окончена.")
+            return True  
+        else:
+            return False 
+        
+    def draw(self):
+        surface.fill((0, 0, 0))
+        self.game_board.draw()
+        if not self.is_started:
+            for button in self.buttons:
+                button.draw()
+        pygame.display.update()
+            
+class Game():
+    """
+    Основной класс, отвечающий за запуск игры. 
+    Он создает экземпляр главного меню и запускает основной игровой цикл.
+    """
+    
+    
+    def __init__(self, width=WIDTH, height=HEIGHT, title_window=TITLE_WINDOW):
+        self.width = width
+        self.height = height
+        self.title_window = title_window
+    
+    def start(self):
+        surface = pygame.display.set_mode((self.width, self.height))
+        pygame.display.set_caption(self.title_window)
+        running = True
+        while running:
+            for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    running = False
+            main_menu = MainMenu()
+            main_menu.draw()
+            main_menu.handle_events()
+            pygame.display.update()
+
+            
 game = Game()
 game.start()
 pygame.quit()
-
-
+        
+        
 
