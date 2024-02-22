@@ -1,3 +1,5 @@
+# https://github.com/Ramchike/life-game
+
 import pygame
 import time
 from config import *
